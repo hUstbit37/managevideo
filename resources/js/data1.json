@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Duong Duc",
+        "age": 23,
+        "address": {
+            "city": "Ha Noi",
+            "country": "Viet Nam"
+        }
+    },
+    {
+        "name": "Duong Thang",
+        "age": 23,
+        "address": {
+            "city": "Bac Kinh",
+            "country": "China"
+        }
+    },
+    {
+        "name": "Duong Phong",
+        "age": 23,
+        "address": {
+            "city": "Nghe An",
+            "country": "Viet Nam"
+        }
+    }
+]

@@ -1,0 +1,44 @@
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+header {
+    color: #fff;
+    padding: 15px 30px;
+    background-color: #3498db;
+}
+
+.active {
+    background-color: red;
+}
+
+.tab {
+    margin: 0;
+    padding: 0;
+}
+
+.tab li {
+    cursor: pointer;
+    display: inline-block;
+    padding: 10px 15px;
+    border: 1px solid #000;
+}
+
+.login,
+.register {
+    display: inline-block;
+    padding: 15px;
+    border: 2px solid blue;
+    margin-top: 15px;
+}
+
+.activeTab {
+    background-color: blue;
+}
