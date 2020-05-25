@@ -9,14 +9,14 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
-// * Import các component (App, home, about, service, contact)
+// * Import các component (App, home)
 
-import Header from './layouts/Header'
-import App from './views/App'
-import Home from './views/Home'
-
-import Login from './Auth/Login'
-import Register from './Auth/Register'
+// import Header from './layouts/Header'
+import App from './App.vue'
+import Home from './components/views/Home.vue'
+import Upload from './components/views/Upload.vue'
+import Login from './components/auth/Login.vue'
+import Register from './components/auth/Register.vue'
 import axios from 'axios';
 
 // import VueAuth from '@websanova/vue-auth'
@@ -30,17 +30,20 @@ const router = new VueRouter({
             name: 'home',
             component: Home
         },
-
         {
             path: '/login',
             name: 'login',
-
             component: Login,
         },
         {
             path: '/register',
             name: 'register',
             component: Register,
+        },
+        {
+            path: '/upload',
+            name: 'upload',
+            component: Upload,
         },
     ],
 });

@@ -17,9 +17,20 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password', 'user_avatar',
     ];
-
+    public function video()
+    {
+       return $this->hasMany('App\QlVideo', 'video_id_user', 'id');
+    }
+    public function comment()
+    {
+       return $this->hasMany('App\Comment', 'comment_id_user', 'id');
+    }
+    
+    public function comment_s(){
+        return $this->hasManyThrough('App\Comment', 'App\QlVideo', 'comment_id_user', 'comment_id_video', 'id');
+    }
     /**
      * The attributes that should be hidden for arrays.
      *
