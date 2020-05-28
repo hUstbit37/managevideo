@@ -14,6 +14,6 @@ class Comment extends Model
     }
     public function video()
     {
-        return $this->belongsTo('App\QlVideo', 'comment_id_video', 'id');
+        return $this->belongsTo('App\Video', 'comment_id_video', 'id');
     }
 }

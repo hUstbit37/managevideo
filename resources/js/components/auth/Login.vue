@@ -20,6 +20,14 @@
                     autocomplete="name"
                   />
                   <span class="invalid-feedback" v-if="isError && errors.name">{{ errors.name }}</span>
+                  <!-- <input
+                    id="email"
+                    type="email"
+                    class="form-control"
+                    v-model="email"
+                    autofocus
+                    autocomplete="email"
+                  />-->
                 </div>
               </div>
 
@@ -72,6 +80,7 @@ export default {
     return {
       name: "",
       password: "",
+      email: "",
       checkLogin: false,
       errors: {},
       isError: false
@@ -86,8 +95,13 @@ export default {
         })
         .then(response => {
           if (response.data.check) {
-            console.log(response);
+            console.log(response.data);
             this.checkLogin = true;
+            localStorage.setItem(
+              "Video4You.user",
+              JSON.stringify(response.data.user)
+            );
+            localStorage.setItem("Video4You.jwt", response.data.token);
             localStorage.setItem("user", response.data.name);
             EventBus.$emit("login", this.checkLogin, this.name);
             // this.name = response.data.name;

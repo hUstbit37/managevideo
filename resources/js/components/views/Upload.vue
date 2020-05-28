@@ -49,16 +49,20 @@ export default {
       });
     },
     handleFileChange(e) {
+      let id = JSON.parse(localStorage.getItem("Video4You.user")).id;
+      console.log(id);
       console.log(e.target.files);
       this.value = e.target.files[0];
       let formData = new FormData();
       formData.append("file", this.value);
+      let axiosConfig = {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      };
+      //id chua dc truyen ve server
       axios
-        .post("api/upload", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data"
-          }
-        })
+        .post("api/upload", formData, id, axiosConfig)
         .then(response => {
           this.listVideo = response.data.listVideo;
         })

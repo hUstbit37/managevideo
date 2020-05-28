@@ -1956,9 +1956,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   mounted: function mounted() {
-    console.log("Component mounted.");
+    console.log('Component mounted.');
   }
 });
 
@@ -2119,12 +2121,21 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       name: "",
       password: "",
+      email: "",
       checkLogin: false,
       errors: {},
       isError: false
@@ -2139,8 +2150,10 @@ __webpack_require__.r(__webpack_exports__);
         password: this.password
       }).then(function (response) {
         if (response.data.check) {
-          console.log(response);
+          console.log(response.data);
           _this.checkLogin = true;
+          localStorage.setItem("Video4You.user", JSON.stringify(response.data.user));
+          localStorage.setItem("Video4You.jwt", response.data.token);
           localStorage.setItem("user", response.data.name);
           _var_www_ManageVideo_resources_js_eventBusCheckAuth_js__WEBPACK_IMPORTED_MODULE_0__["EventBus"].$emit("login", _this.checkLogin, _this.name); // this.name = response.data.name;
 
@@ -2422,6 +2435,9 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     logout: function logout() {
       localStorage.removeItem("user");
+      localStorage.removeItem("Video4You.user");
+      localStorage.removeItem("Video4You.jwt");
+      this.$router.replace(this.$route.query.redirect || "/login");
     }
   }
 });
@@ -2622,12 +2638,18 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 var moment = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
+      isLoggedIn: localStorage.getItem("Video4You.jwt") != null,
+      id_user_loggedIn: null,
+      name_user_loggedIn: null,
       isInputCmt: false,
       isAddCmt: false,
       cmtAdded: {},
@@ -2645,26 +2667,33 @@ var moment = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js"
   created: function created() {
     this.getVideo();
   },
-  mounted: function mounted() {
-    if (localStorage.getItem("user")) {
-      this.checkAuth = true;
-    }
-  },
   methods: {
     getVideo: function getVideo() {
       var _this = this;
 
-      axios.get("api/show.video").then(function (resp) {
-        _this.list_video = resp.data.listVideo;
-      });
+      if (this.isLoggedIn) {
+        var user = JSON.parse(localStorage.getItem("Video4You.user"));
+        this.id_user_loggedIn = user.id;
+        this.name_user_loggedIn = user.name;
+        this.checkAuth = true;
+        axios.post("api/show.video", {
+          id: this.id_user_loggedIn
+        }).then(function (resp) {
+          _this.list_video = resp.data.listVideo;
+          console.log(_this.list_video);
+        });
+      } else {
+        this.$router.replace(this.$route.query.redirect || "/login");
+      }
     },
     addComment: function addComment(id) {
       var _this2 = this;
 
       this.comment.id = id;
       axios.post("api/add.comment/" + id, {
+        comment_id_user: this.id_user_loggedIn,
         comment_content: this.comment.content[id],
-        id_video: this.comment.id
+        comment_id_video: this.comment.id
       }).then(function (response) {
         _this2.cmtAdded = response.data.unitCmt;
         _this2.messCmtAdded = response.data.mess;
@@ -2744,15 +2773,19 @@ __webpack_require__.r(__webpack_exports__);
     handleFileChange: function handleFileChange(e) {
       var _this2 = this;
 
+      var id = JSON.parse(localStorage.getItem("Video4You.user")).id;
+      console.log(id);
       console.log(e.target.files);
       this.value = e.target.files[0];
       var formData = new FormData();
       formData.append("file", this.value);
-      axios.post("api/upload", formData, {
+      var axiosConfig = {
         headers: {
           "Content-Type": "multipart/form-data"
         }
-      }).then(function (response) {
+      }; //id chua dc truyen ve server
+
+      axios.post("api/upload", formData, id, axiosConfig).then(function (response) {
         _this2.listVideo = response.data.listVideo;
       })["catch"](function (error) {
         console.log(error.response.data.errors);
@@ -60344,7 +60377,9 @@ var staticRenderFns = [
             ]),
             _vm._v(" "),
             _c("div", { staticClass: "card-body" }, [
-              _vm._v("I'm an example component.")
+              _vm._v(
+                "\n                    I'm an example component.\n                "
+              )
             ])
           ])
         ])
@@ -61184,7 +61219,7 @@ var render = function() {
               _vm._v(" "),
               _c("div", { staticClass: "media-body" }, [
                 _c("div", { staticClass: "user-name" }, [
-                  _vm._v(_vm._s(_vm.user_name))
+                  _vm._v(_vm._s(item.user.name))
                 ]),
                 _vm._v(" "),
                 _c("div", { staticClass: "cmt-content" }, [
@@ -61261,11 +61296,40 @@ var render = function() {
           ]),
           _vm._v(" "),
           _c("div", { attrs: { id: "video-desc" } }, [
+            _c("i", [
+              _c("small", [_vm._v("uploaded at: " + _vm._s(item.created_at))])
+            ]),
+            _vm._v(" "),
             _c("div", { staticClass: "video-name" }, [
               _c("h4", [_vm._v(_vm._s(item.video_name))])
             ]),
             _vm._v(" "),
-            _vm._m(0, true)
+            _c("div", { staticClass: "row", attrs: { id: "sub" } }, [
+              _c("div", { staticClass: "col-md-8" }, [
+                _c("div", { staticClass: "media" }, [
+                  _vm._m(0, true),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "media-body media-middle" }, [
+                    _c(
+                      "div",
+                      {
+                        staticClass: "media-heading",
+                        staticStyle: { "font-size": "14px" }
+                      },
+                      [
+                        _c("a", { attrs: { href: "#" } }, [
+                          _vm._v(_vm._s(item.user.name))
+                        ])
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _vm._m(1, true)
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("hr")
+              ])
+            ])
           ]),
           _vm._v(" "),
           _c(
@@ -61316,7 +61380,7 @@ var render = function() {
                           }
                         }),
                         _vm._v(" "),
-                        _vm._m(1, true)
+                        _vm._m(2, true)
                       ]
                     )
                   : _c(
@@ -61355,7 +61419,7 @@ var render = function() {
                       _vm._v(" "),
                       _c("div", { staticClass: "media-body" }, [
                         _c("div", { staticClass: "user-name" }, [
-                          _vm._v(_vm._s(_vm.nameUserCmt))
+                          _vm._v(_vm._s(_vm.name_user_loggedIn))
                         ]),
                         _vm._v(" "),
                         _c("div", { staticClass: "cmt-content" }, [
@@ -61397,68 +61461,50 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "row", attrs: { id: "sub" } }, [
-      _c("div", { staticClass: "col-md-8" }, [
-        _c("div", { staticClass: "media" }, [
-          _c(
-            "div",
-            {
-              staticClass: "media-left media-middle",
-              staticStyle: { "margin-right": "5px" }
-            },
-            [
-              _c("a", { attrs: { href: "#" } }, [
-                _c("img", {
-                  staticClass: "media-object",
-                  attrs: {
-                    src:
-                      "https://vnn-imgs-f.vgcloud.vn/2020/03/23/11/trend-avatar-6.jpg",
-                    alt: "avatar",
-                    width: "50",
-                    height: "50"
-                  }
-                })
-              ])
-            ]
-          ),
-          _vm._v(" "),
-          _c("div", { staticClass: "media-body media-middle" }, [
-            _c(
-              "div",
-              {
-                staticClass: "media-heading",
-                staticStyle: { "font-size": "14px" }
-              },
-              [_c("a", { attrs: { href: "#" } }, [_vm._v("Channel")])]
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "btn-group btn-group-sm",
-                attrs: { role: "group", "aria-label": "..." }
-              },
-              [
-                _c("button", { staticClass: "btn btn-subscribe btn-danger" }, [
-                  _c("i", { staticClass: "fa fa-play" }, [_vm._v("Subscribe")])
-                ]),
-                _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    staticClass: "btn btn-default",
-                    attrs: { disabled: "disabled" }
-                  },
-                  [_vm._v("100000")]
-                )
-              ]
-            )
-          ])
+    return _c(
+      "div",
+      {
+        staticClass: "media-left media-middle",
+        staticStyle: { "margin-right": "5px" }
+      },
+      [
+        _c("a", { attrs: { href: "#" } }, [
+          _c("img", {
+            staticClass: "media-object",
+            attrs: {
+              src:
+                "https://vnn-imgs-f.vgcloud.vn/2020/03/23/11/trend-avatar-6.jpg",
+              alt: "avatar",
+              width: "50",
+              height: "50"
+            }
+          })
+        ])
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      {
+        staticClass: "btn-group btn-group-sm",
+        attrs: { role: "group", "aria-label": "..." }
+      },
+      [
+        _c("button", { staticClass: "btn btn-subscribe btn-danger" }, [
+          _c("i", { staticClass: "fa fa-play" }, [_vm._v("Subscribe")])
         ]),
         _vm._v(" "),
-        _c("hr")
-      ])
-    ])
+        _c(
+          "button",
+          { staticClass: "btn btn-default", attrs: { disabled: "disabled" } },
+          [_vm._v("100000")]
+        )
+      ]
+    )
   },
   function() {
     var _vm = this
@@ -76800,17 +76846,7 @@ try {
 
 
 window.axios = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'; // window.axios.defaults.headers.common = {
-//     'X-CSRF-TOKEN': window.Laravel.csrfToken,
-//     'X-Requested-With': 'XMLHttpRequest'
-// };
-// let token = document.head.querySelector('meta[name="csrf-token"]');
-// if (token) {
-//     window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
-// } else {
-//     console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
-// }
-
+window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting

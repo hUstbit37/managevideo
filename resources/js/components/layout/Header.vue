@@ -116,6 +116,9 @@ export default {
   methods: {
     logout() {
       localStorage.removeItem("user");
+      localStorage.removeItem("Video4You.user");
+      localStorage.removeItem("Video4You.jwt");
+      this.$router.replace(this.$route.query.redirect || "/login");
     }
   }
 };

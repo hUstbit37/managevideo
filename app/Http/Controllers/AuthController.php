@@ -30,18 +30,34 @@ class AuthController extends Controller
     }
     public function login(LoginRequest $request)
     {
-        $name = $request->name;
-        $password = $request->password;
-        if (Auth::attempt(['name' => $name, 'password' => $password])) {
-            return response()->json([
-                'check' => Auth::check(),
+       
+        $status = 401;
+        $response = ['error' => 'Unauthorised'];
+        if (Auth::attempt($request->only(['name', 'password']))) {
+            $status=200;
+            $response=[
+                'check'=>true,
+                'user' => Auth::user(),
                 'name' => Auth::user()->name,
-            ]);
-        } else {
-            return response([
-                'mess' => 'loi',
-            ]);
-        }
+                'token'=> Auth::user()->createToken('Video4You')->accessToken,
+            ];
+        } 
+        return response()->json($response, $status);
+   
+
+        // $email = $request->email;
+        // $password = $request->password;
+        // if (Auth::attempt(['email' => $email, 'password' => $password])) {
+        //     return response()->json([
+        //         'check' => Auth::check(),
+        //         'name' => Auth::user()->name,
+                
+        //     ]);
+        // } else {
+        //     return response([
+        //         'mess' => 'loi',
+        //     ]);
+        // }
     }
     public function getVideo()
     {

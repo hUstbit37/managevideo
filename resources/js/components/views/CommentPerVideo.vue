@@ -9,7 +9,7 @@
             class="mr-3 mt-3 rounded-circle"
           />
           <div class="media-body">
-            <div class="user-name">{{user_name}}</div>
+            <div class="user-name">{{item.user.name}}</div>
             <div class="cmt-content">{{item.comment_content}}</div>
             <div>
               <i>{{moment(item.created_at).fromNow()}}</i>

@@ -24,3 +24,6 @@ Route::get('testsearch.home', 'TestSearchController@home');
 Route::get('testsearch.show', 'TestSearchController@show');
 Route::post('testsearch.kq', 'TestSearchController@search');
 //----------------------------------------
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');

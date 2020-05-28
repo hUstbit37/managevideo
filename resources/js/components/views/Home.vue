@@ -7,6 +7,9 @@
         </video>
 
         <div id="video-desc">
+          <i>
+            <small>uploaded at: {{item.created_at}}</small>
+          </i>
           <div class="video-name">
             <h4>{{item.video_name}}</h4>
           </div>
@@ -27,7 +30,7 @@
                 </div>
                 <div class="media-body media-middle">
                   <div class="media-heading" style="font-size: 14px">
-                    <a href="#" class>Channel</a>
+                    <a href="#" class>{{item.user.name}}</a>
                   </div>
                   <div role="group" aria-label="..." class="btn-group btn-group-sm">
                     <button class="btn btn-subscribe btn-danger">
@@ -82,7 +85,7 @@
                 class="mr-3 mt-3 rounded-circle"
               />
               <div class="media-body">
-                <div class="user-name">{{nameUserCmt}}</div>
+                <div class="user-name">{{name_user_loggedIn}}</div>
                 <div class="cmt-content">{{cmtAdded.comment_content}}</div>
                 <div>
                   <i>{{moment(cmtAdded.created_at).fromNow()}}</i>
@@ -107,6 +110,9 @@ import CommentPerVideo from "./CommentPerVideo.vue";
 export default {
   data() {
     return {
+      isLoggedIn: localStorage.getItem("Video4You.jwt") != null,
+      id_user_loggedIn: null,
+      name_user_loggedIn: null,
       isInputCmt: false,
       isAddCmt: false,
       cmtAdded: {},
@@ -124,23 +130,32 @@ export default {
   created() {
     this.getVideo();
   },
-  mounted() {
-    if (localStorage.getItem("user")) {
-      this.checkAuth = true;
-    }
-  },
+
   methods: {
     getVideo() {
-      axios.get("api/show.video").then(resp => {
-        this.list_video = resp.data.listVideo;
-      });
+      if (this.isLoggedIn) {
+        let user = JSON.parse(localStorage.getItem("Video4You.user"));
+        this.id_user_loggedIn = user.id;
+        this.name_user_loggedIn = user.name;
+        this.checkAuth = true;
+
+        axios
+          .post("api/show.video", { id: this.id_user_loggedIn })
+          .then(resp => {
+            this.list_video = resp.data.listVideo;
+            console.log(this.list_video);
+          });
+      } else {
+        this.$router.replace(this.$route.query.redirect || "/login");
+      }
     },
     addComment(id) {
       this.comment.id = id;
       axios
         .post("api/add.comment/" + id, {
+          comment_id_user: this.id_user_loggedIn,
           comment_content: this.comment.content[id],
-          id_video: this.comment.id
+          comment_id_video: this.comment.id
         })
         .then(response => {
           this.cmtAdded = response.data.unitCmt;
