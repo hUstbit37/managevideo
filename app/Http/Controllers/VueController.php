@@ -15,24 +15,19 @@ class VueController extends Controller
     }
     public function listVideo(Request $request)
     {    
-   
-        // get video cua cac users dang duoc user-loggedIn theo doi
-    $list=Video::with('user')
-        ->join('friends', 'friends.friend_id', '=', 'videos.video_id_user')
-        ->where('friends.user_id', '=',$request->id )
-        ->get();
-       
-        // $list1=array(); 
-        // $test=User::find($request->id)->friendsOfMine()->get();
-        // dd($test);
-        // foreach($test as $value){
-        //     $test2=Video::where('video_id_user',$value->id)->with('user')->get()->toArray();
-        //     $list1=array_merge((array)$list1, (array)$test2);
-        // }
-        // arsort($list1); 
-        // $list=(object)$list1;
+        $list=Video::getVideoFriend($request->id)->skip(0)->take(2)->get()->toArray();
+        // dd($list);
         return response([
-            'listVideo' => $list,
+            'list'=>$list,
+        ]);
+    }
+    public function loadMoreVideo(Request $request){
+        $page=$request->page;
+        $id=$request->id;
+        $start = ($page - 1) * 2;
+        $list=Video::getVideoFriend($id) ->skip($start)->take(2)->get();
+        return response([
+            'list'=>$list,
         ]);
     }
     public function getVideo2()
@@ -41,12 +36,12 @@ class VueController extends Controller
         return $list;
     }
     public function upload(Request $request){
-        $id=$request->id;
-        // dd($id);
+        // $id=$request->id;
+        // dd($request->id);
         $video_name = $request->file->getClientOriginalName();
         $request->file->move(public_path('video'), $video_name);
         $video_upload = Video::create([
-            'video_id_user' => 3,
+            'video_id_user' => 1,
             'video_name' => $video_name
         ]);
         $listVideo=Video::orderBy('created_at', 'desc')->get();
@@ -67,7 +62,6 @@ class VueController extends Controller
         return response([
             'mess' => 'Success',
             'unitCmt' => $unitCmt,
-            'nameUserCmt' => 'toan',
         ]);
     }
     public function commentPaganationVue(Request $request)

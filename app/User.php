@@ -20,6 +20,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'email', 'password', 'user_avatar',
     ];
+
+    
+
     public function video()
     {
        return $this->hasMany('App\Video', 'video_id_user', 'id');

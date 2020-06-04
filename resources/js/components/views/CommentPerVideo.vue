@@ -38,7 +38,7 @@ export default {
     this.cmtPaganation();
   },
 
-  props: ["id_video", "user_name"],
+  props: ["id_video"],
   data() {
     return {
       moment: moment,

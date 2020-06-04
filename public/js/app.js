@@ -2492,7 +2492,7 @@ var moment = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js"
   created: function created() {
     this.cmtPaganation();
   },
-  props: ["id_video", "user_name"],
+  props: ["id_video"],
   data: function data() {
     return {
       moment: moment,
@@ -2631,16 +2631,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 var moment = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
 
 
@@ -2650,18 +2640,16 @@ var moment = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js"
       isLoggedIn: localStorage.getItem("Video4You.jwt") != null,
       id_user_loggedIn: null,
       name_user_loggedIn: null,
-      isInputCmt: false,
       isAddCmt: false,
       cmtAdded: {},
-      nameUserCmt: "",
-      messCmtAdded: "",
       list_video: {},
       comment: {
         content: [],
         id: 0
       },
-      checkAuth: false,
-      moment: moment
+      moment: moment,
+      videoMoreExists: true,
+      page: 2
     };
   },
   created: function created() {
@@ -2679,15 +2667,48 @@ var moment = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js"
         axios.post("api/show.video", {
           id: this.id_user_loggedIn
         }).then(function (resp) {
-          _this.list_video = resp.data.listVideo;
-          console.log(_this.list_video);
+          console.log(resp.data.list);
+          _this.list_video = resp.data.list; // if (resp.data.current_page < resp.data.last_page) {
+          //   this.videoMoreExists = true;
+          //   this.nextPage = resp.data.current_page + 1;
+          // } else {
+          //   this.videoMoreExists = false;
+          // }
+        })["catch"](function (error) {
+          return console.log(error);
         });
       } else {
         this.$router.replace(this.$route.query.redirect || "/login");
       }
     },
-    addComment: function addComment(id) {
+    loadMoreVideo: function loadMoreVideo() {
       var _this2 = this;
+
+      axios.post("api/loadMoreVideo", {
+        page: this.page,
+        id: this.id_user_loggedIn
+      }).then(function (response) {
+        // console.log(response.data.list);
+        if (response.data.list.video_count == 0) {
+          _this2.videoMoreExists = false;
+        }
+
+        response.data.list.forEach(function (data) {
+          _this2.list_video.push(data);
+        });
+        _this2.page += 1; // if (response.data.current_page < response.data.last_page) {
+        //   this.videoMoreExists = true;
+        //   this.nextPage = resp.data.current_page + 1;
+        // } else {
+        //   this.videoMoreExists = false;
+        // }
+        // response.data.data.forEach(data => {
+        //   this.list_video.push(data);
+        // });
+      });
+    },
+    addComment: function addComment(id) {
+      var _this3 = this;
 
       this.comment.id = id;
       axios.post("api/add.comment/" + id, {
@@ -2695,11 +2716,10 @@ var moment = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js"
         comment_content: this.comment.content[id],
         comment_id_video: this.comment.id
       }).then(function (response) {
-        _this2.cmtAdded = response.data.unitCmt;
-        _this2.messCmtAdded = response.data.mess;
-        _this2.isAddCmt = id;
-        _this2.nameUserCmt = response.data.nameUserCmt;
-        _this2.comment.content[id] = "";
+        _this3.cmtAdded = response.data.unitCmt;
+        _this3.messCmtAdded = response.data.mess;
+        _this3.isAddCmt = id;
+        _this3.comment.content[id] = "";
       });
     }
   },
@@ -2747,9 +2767,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
+      id: 1,
       value: 0,
       listVideo: {},
       mess: false
@@ -2778,14 +2806,14 @@ __webpack_require__.r(__webpack_exports__);
       console.log(e.target.files);
       this.value = e.target.files[0];
       var formData = new FormData();
-      formData.append("file", this.value);
-      var axiosConfig = {
+      formData.append("file", this.value); //id chua dc truyen ve server
+
+      axios.post("api/upload", formData, this.id, {
+        id: this.id,
         headers: {
           "Content-Type": "multipart/form-data"
         }
-      }; //id chua dc truyen ve server
-
-      axios.post("api/upload", formData, id, axiosConfig).then(function (response) {
+      }).then(function (response) {
         _this2.listVideo = response.data.listVideo;
       })["catch"](function (error) {
         console.log(error.response.data.errors);
@@ -61283,177 +61311,189 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "row justify-content-center" }, [
-    _c(
-      "div",
-      { attrs: { id: "list-video" } },
-      _vm._l(_vm.list_video, function(item, index) {
-        return _c("div", { key: index }, [
-          _c("video", { attrs: { width: "640px", controls: "controls" } }, [
-            _c("source", {
-              attrs: { src: "video/" + item.video_name, type: "video/mp4" }
-            })
-          ]),
-          _vm._v(" "),
-          _c("div", { attrs: { id: "video-desc" } }, [
-            _c("i", [
-              _c("small", [_vm._v("uploaded at: " + _vm._s(item.created_at))])
+  return _c("div", [
+    _c("div", { staticClass: "row justify-content-center" }, [
+      _c(
+        "div",
+        { attrs: { id: "list-video" } },
+        _vm._l(_vm.list_video, function(item, index) {
+          return _c("div", { key: index }, [
+            _c("video", { attrs: { width: "640px", controls: "controls" } }, [
+              _c("source", {
+                attrs: { src: "video/" + item.video_name, type: "video/mp4" }
+              })
             ]),
             _vm._v(" "),
-            _c("div", { staticClass: "video-name" }, [
-              _c("h4", [_vm._v(_vm._s(item.video_name))])
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "row", attrs: { id: "sub" } }, [
-              _c("div", { staticClass: "col-md-8" }, [
-                _c("div", { staticClass: "media" }, [
-                  _vm._m(0, true),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "media-body media-middle" }, [
-                    _c(
-                      "div",
-                      {
-                        staticClass: "media-heading",
-                        staticStyle: { "font-size": "14px" }
-                      },
-                      [
-                        _c("a", { attrs: { href: "#" } }, [
-                          _vm._v(_vm._s(item.user.name))
-                        ])
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _vm._m(1, true)
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("hr")
-              ])
-            ])
-          ]),
-          _vm._v(" "),
-          _c(
-            "div",
-            { staticClass: "comment-area" },
-            [
-              _c("div", [
-                _vm.checkAuth
-                  ? _c(
-                      "form",
-                      {
-                        staticClass: "form-group",
-                        attrs: { id: "form-comment" },
-                        on: {
-                          submit: function($event) {
-                            $event.preventDefault()
-                            return _vm.addComment(item.id)
-                          }
-                        }
-                      },
-                      [
-                        _c("textarea", {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.comment.content[item.id],
-                              expression: "comment.content[item.id]"
-                            }
-                          ],
-                          staticClass: "comment-textarea",
-                          attrs: {
-                            name: "comment_content",
-                            placeholder: "Write comment.."
-                          },
-                          domProps: { value: _vm.comment.content[item.id] },
-                          on: {
-                            input: function($event) {
-                              if ($event.target.composing) {
-                                return
-                              }
-                              _vm.$set(
-                                _vm.comment.content,
-                                item.id,
-                                $event.target.value
-                              )
-                            }
-                          }
-                        }),
-                        _vm._v(" "),
-                        _vm._m(2, true)
-                      ]
-                    )
-                  : _c(
-                      "div",
-                      { staticClass: "text-center" },
-                      [
-                        _vm._v(
-                          "\n            Please Login to Comment\n            "
-                        ),
-                        _c(
-                          "router-link",
-                          {
-                            staticClass: "nav-link",
-                            attrs: { to: { name: "login" } }
-                          },
-                          [_c("b", [_vm._v("Login")])]
-                        ),
-                        _vm._v(" "),
-                        _c("hr")
-                      ],
-                      1
-                    )
+            _c("div", { attrs: { id: "video-desc" } }, [
+              _c("i", [
+                _c("small", [
+                  _vm._v(
+                    "Uploaded at: " +
+                      _vm._s(_vm.moment(item.created_at).fromNow())
+                  )
+                ])
               ]),
               _vm._v(" "),
-              _c("div", { attrs: { id: "show-comment" } }, [
-                _vm.isAddCmt == item.id
-                  ? _c("div", { staticClass: "media item-cmt" }, [
-                      _c("img", {
-                        staticClass: "mr-3 mt-3 rounded-circle",
+              _c("div", { staticClass: "video-name" }, [
+                _c("h4", [_vm._v(_vm._s(item.video_name))])
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "row", attrs: { id: "subciption" } }, [
+                _c("div", { staticClass: "col-md-8" }, [
+                  _c("div", { staticClass: "media" }, [
+                    _vm._m(0, true),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "media-body media-middle" }, [
+                      _c(
+                        "div",
+                        {
+                          staticClass: "media-heading",
+                          staticStyle: { "font-size": "14px" }
+                        },
+                        [
+                          _c("a", { attrs: { href: "#" } }, [
+                            _vm._v(_vm._s(item.user.name))
+                          ])
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _vm._m(1, true)
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("hr")
+                ])
+              ])
+            ]),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "comment-area" },
+              [
+                _c("div", [
+                  _c(
+                    "form",
+                    {
+                      staticClass: "form-group",
+                      attrs: { id: "form-comment" },
+                      on: {
+                        submit: function($event) {
+                          $event.preventDefault()
+                          return _vm.addComment(item.id)
+                        }
+                      }
+                    },
+                    [
+                      _c("textarea", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.comment.content[item.id],
+                            expression: "comment.content[item.id]"
+                          }
+                        ],
+                        staticClass: "comment-textarea",
                         attrs: {
-                          src:
-                            "https://vnn-imgs-f.vgcloud.vn/2020/03/23/11/trend-avatar-6.jpg",
-                          alt: "avatar"
+                          name: "comment_content",
+                          placeholder: "Write comment.."
+                        },
+                        domProps: { value: _vm.comment.content[item.id] },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.comment.content,
+                              item.id,
+                              $event.target.value
+                            )
+                          }
                         }
                       }),
                       _vm._v(" "),
-                      _c("div", { staticClass: "media-body" }, [
-                        _c("div", { staticClass: "user-name" }, [
-                          _vm._v(_vm._s(_vm.name_user_loggedIn))
-                        ]),
+                      _vm._m(2, true)
+                    ]
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { attrs: { id: "show-comment" } }, [
+                  _vm.isAddCmt == item.id
+                    ? _c("div", { staticClass: "media item-cmt" }, [
+                        _c("img", {
+                          staticClass: "mr-3 mt-3 rounded-circle",
+                          attrs: {
+                            src:
+                              "https://vnn-imgs-f.vgcloud.vn/2020/03/23/11/trend-avatar-6.jpg",
+                            alt: "avatar"
+                          }
+                        }),
                         _vm._v(" "),
-                        _c("div", { staticClass: "cmt-content" }, [
-                          _vm._v(_vm._s(_vm.cmtAdded.comment_content))
-                        ]),
-                        _vm._v(" "),
-                        _c("div", [
-                          _c("i", [
-                            _vm._v(
-                              _vm._s(
-                                _vm.moment(_vm.cmtAdded.created_at).fromNow()
+                        _c("div", { staticClass: "media-body" }, [
+                          _c("div", { staticClass: "user-name" }, [
+                            _vm._v(_vm._s(_vm.name_user_loggedIn))
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "cmt-content" }, [
+                            _vm._v(_vm._s(_vm.cmtAdded.comment_content))
+                          ]),
+                          _vm._v(" "),
+                          _c("div", [
+                            _c("i", [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.moment(_vm.cmtAdded.created_at).fromNow()
+                                )
                               )
-                            )
-                          ])
-                        ]),
-                        _vm._v(" "),
-                        _c("hr")
+                            ])
+                          ]),
+                          _vm._v(" "),
+                          _c("hr")
+                        ])
                       ])
-                    ])
-                  : _vm._e()
-              ]),
-              _vm._v(" "),
-              _c("CommentPerVideo", {
-                attrs: { id_video: item.id, user_name: item.user.name }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c("hr")
-        ])
-      }),
-      0
-    )
+                    : _vm._e()
+                ]),
+                _vm._v(" "),
+                _c("CommentPerVideo", { attrs: { id_video: item.id } })
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c("hr")
+          ])
+        }),
+        0
+      )
+    ]),
+    _vm._v(" "),
+    _vm.videoMoreExists
+      ? _c(
+          "div",
+          {
+            staticClass: "text-center",
+            staticStyle: { "margin-bottom": "15px" }
+          },
+          [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-primary",
+                attrs: { type: "button" },
+                on: {
+                  click: function($event) {
+                    return _vm.loadMoreVideo()
+                  }
+                }
+              },
+              [
+                _c("span", { staticClass: "fa fa-arrow-down" }),
+                _vm._v("\n      Load More\n    ")
+              ]
+            )
+          ]
+        )
+      : _vm._e()
   ])
 }
 var staticRenderFns = [

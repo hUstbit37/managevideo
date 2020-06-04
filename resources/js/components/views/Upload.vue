@@ -1,5 +1,11 @@
 <template>
   <div>
+    <!-- <form @submit.prevent="handleFileChange" enctype="multipart/form-data">
+      <input type="file" />
+      <button type="submit" class="btn btn-danger">
+        <span class="fa fa-upload">Upload</span>
+      </button>
+    </form>-->
     <label class="file-select">
       <div class="select-button">
         <i class="fa fa-upload"></i>
@@ -10,6 +16,7 @@
     </label>
     <div v-if="value"></div>
     <hr />
+
     <div v-if="mess">{{mess}}</div>
     <div v-else>
       <div v-for="(item, index) in listVideo" :key="index">
@@ -30,6 +37,7 @@
 export default {
   data() {
     return {
+      id: 1,
       value: 0,
       listVideo: {},
       mess: false
@@ -48,6 +56,7 @@ export default {
         }
       });
     },
+
     handleFileChange(e) {
       let id = JSON.parse(localStorage.getItem("Video4You.user")).id;
       console.log(id);
@@ -55,14 +64,15 @@ export default {
       this.value = e.target.files[0];
       let formData = new FormData();
       formData.append("file", this.value);
-      let axiosConfig = {
-        headers: {
-          "Content-Type": "multipart/form-data"
-        }
-      };
+
       //id chua dc truyen ve server
       axios
-        .post("api/upload", formData, id, axiosConfig)
+        .post("api/upload", formData, this.id, {
+          id: this.id,
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        })
         .then(response => {
           this.listVideo = response.data.listVideo;
         })

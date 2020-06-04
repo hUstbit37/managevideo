@@ -14,5 +14,6 @@ Route::get('getVideo2', 'VueController@getVideo2');
 Route::post('upload', 'VueController@upload');
 
 Route::post('show.video', 'VueController@listVideo');
+Route::post('loadMoreVideo', 'VueController@loadMoreVideo');
 Route::post('add.comment/{id}', 'VueController@addCmt');
 Route::post('cmtPaganation/{id}', 'VueController@commentPaganationVue');
