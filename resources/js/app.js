@@ -7,6 +7,8 @@ Vue.component('test-search', require('./components/TestSearch/TestSearch.vue').d
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 Vue.use(VueRouter)
+import Vuetify from 'vuetify';
+Vue.use(Vuetify);
 
 // * Import các component (App, home)
 
@@ -17,38 +19,19 @@ import Upload from './components/views/Upload.vue'
 import Login from './components/auth/Login.vue'
 import Register from './components/auth/Register.vue'
 import axios from 'axios';
+import { routes } from './routes.js'
 
 // import VueAuth from '@websanova/vue-auth'
 // import VueAxios from 'vue-axios';
 
 const router = new VueRouter({
     mode: 'history',
-    routes: [
-        {
-            path: '/',
-            name: 'home',
-            component: Home
-        },
-        {
-            path: '/login',
-            name: 'login',
-            component: Login,
-        },
-        {
-            path: '/register',
-            name: 'register',
-            component: Register,
-        },
-        {
-            path: '/upload',
-            name: 'upload',
-            component: Upload,
-        },
-    ],
+    routes
 });
 
 
 const app = new Vue({
+    vuetify: new Vuetify(),
     el: '#app',
     components: { App },
     router,

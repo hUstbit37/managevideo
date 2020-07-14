@@ -1,23 +1,55 @@
 <template>
   <div>
-    <!-- <form @submit.prevent="handleFileChange" enctype="multipart/form-data">
-      <input type="file" />
+    <form @submit.prevent="upload" enctype="multipart/form-data">
+      <input style="cursor: pointer;" type="file" @change="handleFileChange" />
       <button type="submit" class="btn btn-danger">
         <span class="fa fa-upload">Upload</span>
       </button>
-    </form>-->
-    <label class="file-select">
-      <div class="select-button">
-        <i class="fa fa-upload"></i>
-        <span v-if="value">{{value.name}}</span>
-        <span v-else>Select File</span>
-      </div>
-      <input type="file" @change="handleFileChange" />
-    </label>
-    <div v-if="value"></div>
-    <hr />
+    </form>
 
-    <div v-if="mess">{{mess}}</div>
+    <hr />
+    <v-app>
+      <v-card>
+        <v-list dense>
+          <v-list-tile>
+            <v-list-tile-action>
+              <v-icon>home</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+              <v-list-tile-title>Home</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+          <v-list-tile>
+            <v-list-tile-action>
+              <v-icon>contact_mail</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+              <v-list-tile-title>Contact</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+        </v-list>
+      </v-card>
+
+      <v-content>
+        <!-- <v-text-field
+          width="300"
+          v-model="search"
+          append-icon="mdi-magnify"
+          label="Search"
+          single-line
+          hide-details
+        ></v-text-field>-->
+        <v-data-table :headers="headers" :items="listVideo" :search="search">
+          <template v-slot:item.video_name="{ item }">
+            <span id="itemName">
+              <strong>{{ item.video_name }}</strong>
+            </span>
+          </template>
+        </v-data-table>
+      </v-content>
+    </v-app>
+
+    <!-- <div v-if="mess">{{mess}}</div>
     <div v-else>
       <div v-for="(item, index) in listVideo" :key="index">
         <video width="300px" controls="controls">
@@ -27,7 +59,7 @@
           <strong>{{item.video_name}}</strong>
         </div>
       </div>
-    </div>
+    </div>-->
   </div>
 </template>
 
@@ -37,18 +69,28 @@
 export default {
   data() {
     return {
-      id: 1,
-      value: 0,
-      listVideo: {},
-      mess: false
+      search: "",
+      headers: [
+        { text: "Name", align: "start", value: "video_name" },
+        { text: "Created_at", value: "created_at" },
+        { text: "Like", value: "like" },
+        { text: "View", value: "view" },
+        { text: "Action" }
+      ],
+      file: "",
+      listVideo: [],
+      mess: false,
+      id: null
     };
   },
-  created() {
-    this.getVideo2();
+  mounted() {
+    this.id = JSON.parse(localStorage.getItem("Video4You.user")).id;
+    this.showUserVideo();
   },
+
   methods: {
-    getVideo2() {
-      axios.get("api/getVideo2").then(response => {
+    showUserVideo() {
+      axios.post("api/showUserVideo", { id: this.id }).then(response => {
         if (response.data) {
           this.listVideo = response.data;
         } else {
@@ -56,25 +98,24 @@ export default {
         }
       });
     },
-
     handleFileChange(e) {
-      let id = JSON.parse(localStorage.getItem("Video4You.user")).id;
-      console.log(id);
-      console.log(e.target.files);
-      this.value = e.target.files[0];
+      this.file = e.target.files[0];
+      console.log(this.file.name);
+    },
+    upload() {
       let formData = new FormData();
-      formData.append("file", this.value);
-
-      //id chua dc truyen ve server
+      formData.append("file", this.file);
+      formData.append("id", this.id);
+      const config = {
+        headers: {
+          "content-type": "multipart/form-data"
+        }
+      };
       axios
-        .post("api/upload", formData, this.id, {
-          id: this.id,
-          headers: {
-            "Content-Type": "multipart/form-data"
-          }
-        })
+        .post("api/upload", formData, config)
         .then(response => {
-          this.listVideo = response.data.listVideo;
+          console.log(response.data.video_upload);
+          this.listVideo.unshift(response.data.video_upload);
         })
         .catch(error => {
           console.log(error.response.data.errors);

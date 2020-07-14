@@ -14,7 +14,6 @@
             <div>
               <i>{{moment(item.created_at).fromNow()}}</i>
             </div>
-            <hr />
           </div>
         </div>
       </div>
@@ -42,8 +41,8 @@ export default {
   data() {
     return {
       moment: moment,
-      cmtPerVideo: {},
-      page: 2,
+      cmtPerVideo: [],
+      page: 1,
       isFullCmt: false,
       cmt_count: 0
     };
@@ -57,9 +56,12 @@ export default {
         })
         .then(response => {
           console.log(response.data.cmt);
-          this.cmtPerVideo = response.data.cmt;
+          response.data.cmt.forEach(item => {
+            this.cmtPerVideo.push(item);
+          });
+
           this.cmt_count = response.data.cmt_count;
-          if (response.data.cmt.length == response.data.cmt_count) {
+          if (this.cmtPerVideo.length == response.data.cmt_count) {
             this.isFullCmt = !this.isFullCmt;
           }
         });
@@ -75,20 +77,25 @@ export default {
     width: 640px;
     padding: 5px;
     font: Arial;
+    .media-body {
+      background-color: #f0f2f5 !important;
+      border-radius: 11px;
+      padding: 3px;
+    }
     .rounded-circle {
-      width: 60px;
+      width: 50px;
     }
 
     .user-name {
-      font-size: 19px;
+      font-size: 18px;
       font-weight: bold;
       color: blue;
     }
     .cmt-content {
-      font-size: 16px;
+      font-size: 15px;
     }
     i {
-      font-size: 14px;
+      font-size: 13px;
       color: #999;
     }
   }

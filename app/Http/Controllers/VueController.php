@@ -1,12 +1,15 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Video;
 use Illuminate\Http\Request;
+use TeamTNT\TNTSearch\TNTSearch;
 use Auth;
 use App\User;
 use App\Comment;
 use App\Friend;
+
 class VueController extends Controller
 {
     public function index()
@@ -14,44 +17,52 @@ class VueController extends Controller
         return view('VuePage/index');
     }
     public function listVideo(Request $request)
-    {    
-        $list=Video::getVideoFriend($request->id)->skip(0)->take(2)->get()->toArray();
+    {
+        $h = User::find($request->id)->friendsOfMine()->get();
+
+        $end = [];
+        foreach ($h as $value) {
+            $k = $value->id;
+            $end =  array_merge($end, (array) $k);
+        }
+        // dd($end);
+        $list = Video::getVideoFriend($request->id)->skip(0)->take(2)->get()->toArray();
         // dd($list);
         return response([
-            'list'=>$list,
+            'list' => $list,
+            'friendListId' => $end
         ]);
     }
-    public function loadMoreVideo(Request $request){
-        $page=$request->page;
-        $id=$request->id;
-        $start = ($page - 1) * 2;
-        $list=Video::getVideoFriend($id) ->skip($start)->take(2)->get();
-        return response([
-            'list'=>$list,
-        ]);
-    }
-    public function getVideo2()
+    public function loadMoreVideo(Request $request)
     {
-        $list=Video::get();
-        return $list;
+        $page = $request->page;
+        $id = $request->id;
+        $start = ($page - 1) * 2;
+        $list = Video::getVideoFriend($id)->skip($start)->take(2)->get();
+        return response([
+            'list' => $list,
+        ]);
     }
-    public function upload(Request $request){
-        // $id=$request->id;
+    public function showUserVideo(Request $request)
+    {
         // dd($request->id);
+        $listUserVideo = User::find($request->id)->video()->orderBy('created_at', 'desc')->get();
+        return $listUserVideo;
+    }
+    public function upload(Request $request)
+    {
+
         $video_name = $request->file->getClientOriginalName();
         $request->file->move(public_path('video'), $video_name);
         $video_upload = Video::create([
-            'video_id_user' => 1,
+            'video_id_user' => $request->id,
             'video_name' => $video_name
         ]);
-        $listVideo=Video::orderBy('created_at', 'desc')->get();
         return response([
-            'listVideo'=>$listVideo,
-            'video_upload'=> $video_upload
+            'video_upload' => $video_upload
         ]);
     }
 
-   
     public function addCmt(Request $request, $id)
     {
         $unitCmt = new Comment();
@@ -71,13 +82,47 @@ class VueController extends Controller
         $start = ($page - 1) * 4;
         $cmt_count = Video::find($id)->comment()->count();
         // $cmt = Video::find($id)->comment()->orderBy('created_at', 'desc')->skip(0)->take($start)->get();
-        $cmt=Comment::where('comment_id_video', $id)->with('user')->orderBy('created_at', 'desc')->skip(0)->take($start)->get();
+        $cmt = Comment::where('comment_id_video', $id)->with('user')->orderBy('created_at', 'desc')->skip($start)->take(4)->get();
         // dd($cmt);
 
         return response([
             'message' => 'success',
             'cmt' => $cmt,
             'cmt_count' => $cmt_count,
+        ]);
+    }
+    public function sub(Request $request)
+    {
+        $check1 = Friend::where('user_id', $request->user_id)->where('friend_id', $request->friend_id)->first();
+        if ($check1) {
+            $a = Friend::where('user_id', $request->user_id)->where('friend_id', $request->friend_id)->delete();
+            return response([
+                'check' => true
+            ]);
+        } else {
+            $b = Friend::firstOrCreate($request->all());
+            return response([
+                'check' => false
+            ]);
+        }
+    }
+    public function search(Request $request)
+    {
+        $key = $request->search;
+        $kq = Video::search($key)->get();
+        $tnt = new TNTSearch;
+        $kq = $kq->map(function ($article) use ($key, $tnt) {
+            $article->video_name = $tnt->highlight($article->video_name, $key, 'b');
+            return $article;
+        });
+        $kq_count = $kq->count();
+
+        $ka = Video::where('video_name', 'like', '%' . $key . '%')->with('user')->get();
+        $ka_count = $ka->count();
+        // dd($ka->toArray());
+        return response([
+            'kq' =>  $ka,
+            'kq_count' => $ka_count,
         ]);
     }
 }

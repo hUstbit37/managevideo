@@ -86,6 +86,11 @@ export default {
       isError: false
     };
   },
+  created() {
+    if (localStorage.getItem("Video4You.jwt") != null) {
+      this.$router.replace(this.$route.query.redirect || "/");
+    }
+  },
   methods: {
     login() {
       axios

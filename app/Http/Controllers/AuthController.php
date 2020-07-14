@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+
+use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\User;
-use Illuminate\Http\Request;
-use Auth;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -30,39 +31,24 @@ class AuthController extends Controller
     }
     public function login(LoginRequest $request)
     {
-       
         $status = 401;
         $response = ['error' => 'Unauthorised'];
         if (Auth::attempt($request->only(['name', 'password']))) {
-            $status=200;
-            $response=[
-                'check'=>true,
+            $status = 200;
+            $user = Auth::user();
+            $response = [
+                'check' => true,
                 'user' => Auth::user(),
                 'name' => Auth::user()->name,
-                'token'=> Auth::user()->createToken('Video4You')->accessToken,
+                'token' => $user->createToken('Video4You')->accessToken,
             ];
-        } 
+        }
         return response()->json($response, $status);
-   
-
-        // $email = $request->email;
-        // $password = $request->password;
-        // if (Auth::attempt(['email' => $email, 'password' => $password])) {
-        //     return response()->json([
-        //         'check' => Auth::check(),
-        //         'name' => Auth::user()->name,
-                
-        //     ]);
-        // } else {
-        //     return response([
-        //         'mess' => 'loi',
-        //     ]);
-        // }
     }
-    public function getVideo()
-    {
-        dd(Auth::user());
-        $list=Video::get();
-        return $list;
-    }
+    // public function getVideo()
+    // {
+    //     dd(Auth::user());
+    //     $list = Video::get();
+    //     return $list;
+    // }
 }
