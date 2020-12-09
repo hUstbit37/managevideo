@@ -52,8 +52,13 @@
             </div>
             <!-- <hr /> -->
 
-            <video width="640px" controls="controls" id="video" preload="metadata">
-              <source :src="`video/${item.video_name}#t=${10+index}`" type="video/mp4" />
+            <video
+              width="640px"
+              controls="controls"
+              id="video"
+              :poster="`video/thumbnails/${item.video_thumbnail}`"
+            >
+              <source :src="`video/${item.video_path}`" type="video/mp4" />
             </video>
           </div>
 

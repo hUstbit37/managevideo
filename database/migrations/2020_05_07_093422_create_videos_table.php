@@ -19,6 +19,7 @@ class CreateVideosTable extends Migration
             $table->string('video_thumbnail')->nullable();
             $table->integer('video_id_user');
             $table->timestamps();
+            $table->foreign('video_id_user')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

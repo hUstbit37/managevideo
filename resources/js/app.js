@@ -1,12 +1,12 @@
 require('./bootstrap');
 window.Vue = require('vue');
 
-Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('test-search', require('./components/TestSearch/TestSearch.vue').default);
 
 import Vue from 'vue'
-import VueRouter from 'vue-router'
-Vue.use(VueRouter)
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+Vue.use(ElementUI);
 import Vuetify from 'vuetify';
 Vue.use(Vuetify);
 
@@ -19,15 +19,12 @@ import Upload from './components/views/Upload.vue'
 import Login from './components/auth/Login.vue'
 import Register from './components/auth/Register.vue'
 import axios from 'axios';
-import { routes } from './routes.js'
+import router from './routes.js'
 
-// import VueAuth from '@websanova/vue-auth'
-// import VueAxios from 'vue-axios';
-
-const router = new VueRouter({
-    mode: 'history',
-    routes
-});
+// const router = new VueRouter({
+//     mode: 'history',
+//     routes
+// });
 
 
 const app = new Vue({

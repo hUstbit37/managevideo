@@ -15,7 +15,7 @@ class Video extends Model
         return 'videos_index';
     }
 
-    protected $fillable = ['video_name', 'video_id_user'];
+    protected $fillable = ['video_name', 'video_id_user', 'video_path', 'video_thumbnail', 'like', 'view'];
 
     public static function getVideoFriend($id)
     {

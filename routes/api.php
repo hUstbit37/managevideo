@@ -12,7 +12,7 @@ Route::post('login', 'AuthController@login');
 Route::post('logout', 'AuthController@logout');
 Route::post('showUserVideo', 'VueController@showUserVideo');
 Route::post('upload', 'VueController@upload');
-
+Route::get('delete/{id}', 'VueController@deleteVideo');
 Route::post('show.video', 'VueController@listVideo');
 Route::post('loadMoreVideo', 'VueController@loadMoreVideo');
 Route::post('add.comment/{id}', 'VueController@addCmt');

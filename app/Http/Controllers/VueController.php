@@ -51,18 +51,39 @@ class VueController extends Controller
     }
     public function upload(Request $request)
     {
-
-        $video_name = $request->file->getClientOriginalName();
-        $request->file->move(public_path('video'), $video_name);
-        $video_upload = Video::create([
-            'video_id_user' => $request->id,
-            'video_name' => $video_name
-        ]);
+        if ($request->fileThumbnail) {
+            $thumbnail = $request->fileThumbnail->getClientOriginalName();
+            $request->fileThumbnail->move(public_path('video/thumbnails'), $thumbnail);
+        }
+        if ($request->fileVideo) {
+            $video_path = $request->fileVideo->getClientOriginalName();
+            $request->fileVideo->move(public_path('video'), $video_path);
+            $video_upload = Video::create([
+                'video_id_user' => $request->id,
+                'video_path' => $video_path,
+                'video_name' => $request->fileName,
+                'video_thumbnail' => $thumbnail,
+                'like' => 0,
+                'view' => 0
+            ]);
+        } else {
+            $video_upload = Video::find($request->video_id);
+            $video_upload->video_name = $request->fileName;
+            $video_upload->video_thumbnail = $thumbnail;
+            $video_upload->save();
+        }
         return response([
             'video_upload' => $video_upload
         ]);
     }
-
+    public function deleteVideo($id)
+    {
+        // dd($id);
+        Video::find($id)->comment()->delete();
+        $a = Video::find($id)->delete();
+        // dd($a);
+        return $a;
+    }
     public function addCmt(Request $request, $id)
     {
         $unitCmt = new Comment();

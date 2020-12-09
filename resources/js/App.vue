@@ -1,7 +1,7 @@
 <template>
   <div style="background-color: #f2f5f9">
-    <Header></Header>
-    <div class="container">
+    <Header v-if="!checkAdmin"></Header>
+    <div :class="{container:!checkAdmin}">
       <router-view></router-view>
     </div>
   </div>
@@ -12,13 +12,19 @@ import Header from "./components/layout/Header.vue";
 export default {
   data() {
     return {
-      key: 0
+      key: 0,
+      checkAdmin: false,
     };
   },
-  mounted() {},
+  created() {
+    console.log(this.$route.name);
+    if (this.$route.name == "admin") {
+      this.checkAdmin = true;
+    }
+  },
   components: {
-    Header
-  }
+    Header,
+  },
 };
 </script>
 
